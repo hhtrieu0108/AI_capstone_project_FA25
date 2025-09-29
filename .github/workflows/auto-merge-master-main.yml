@@ -1,17 +1,21 @@
 name: Sync master to main
 on:
-  push:
+  pull_request:
+    types:
+      - closed # Trigger when a Pull Request is closed
     branches:
-      - master
+      - master # Only listen to PRs targeting the master branch
 
 jobs:
   sync:
+    # Only run the job if the PR was merged, not just closed
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: main # Checkout the target branch (main)
           fetch-depth: 0
 
       - name: Configure Git
@@ -21,6 +25,8 @@ jobs:
 
       - name: Merge master into main and Push
         run: |
+          # The merge that just occurred updated 'master' on the remote.
+          # We need to fetch the updated master.
           git fetch origin master
 
           # Attempt the fast-forward merge
@@ -30,5 +36,6 @@ jobs:
           else
             echo "Merge failed (likely not a fast-forward). No push performed."
             # Exit with 0 to allow the job to succeed even without a fast-forward merge.
+            # If you want the job to FAIL on non-fast-forward, change 'exit 0' to 'exit 1'.
             exit 0
           fi
