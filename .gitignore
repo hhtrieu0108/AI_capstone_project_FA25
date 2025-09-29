@@ -1,0 +1,18 @@
+# Virtual environments
+venv/
+
+# Python cache
+__pycache__/
+
+# Logs
+logs/
+*.log
+
+# checkpoints
+.ipynb_checkpoints/
+
+# Data
+data/
+
+# Environment variables
+*.env
