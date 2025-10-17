@@ -26,7 +26,7 @@ logger.addHandler(ch)
 class GoogleDriveAuthenticator:
 
     def __init__(self, scope=None):
-        self.scope = scope or SCOPES
+        self.scope = scope
         self.service = None
 
     def _save_creds(self, creds, path="key/token.pickle"):

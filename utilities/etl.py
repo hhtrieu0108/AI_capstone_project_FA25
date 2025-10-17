@@ -1,12 +1,10 @@
 import os
+import pillow_heif
 from PIL import Image
 from pathlib import Path
-import pillow_heif
 from roboflow import Roboflow
 
 from ingest_data import GoogleDriveAuthenticator, GoogleDriveService
-
-pillow_heif.register_heif_opener()
 
 class DataPipelineProcesser:
     
@@ -30,7 +28,6 @@ class DataPipelineProcesser:
         processed_path = Path(processed_path)
         processed_path.mkdir(parents=True, exist_ok=True)
 
-        # Duyệt từng folder
         for folder in raw_path.iterdir():
             if not folder.is_dir():
                 continue
@@ -47,7 +44,6 @@ class DataPipelineProcesser:
                 new_name = f"{clean_folder_name}_{base_name}.jpg"
                 new_path = dest_folder / new_name
 
-                # Skip nếu file đã tồn tại
                 if new_path.exists():
                     continue
 
@@ -74,15 +70,17 @@ class RoboflowUploader:
                 print(f"Error uploading {file_path}: {e}")
 
 if __name__ == "__main__":
+
+    pillow_heif.register_heif_opener()
+
     list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
     
     RAW_DATA_PATH = 'test/test_folder'
     PROCESSED_DATA_PATH = "test/processed_data"
-    
     pipeline = DataPipelineProcesser()
     
     pipeline.processing_data(raw_path=RAW_DATA_PATH, processed_path=PROCESSED_DATA_PATH)
-    
+
     api_key = os.environ.get("ROBOFLOW_API_KEY")
     workspace = "plant-xcvlc"
     project = "capstone-project-jlomf"
