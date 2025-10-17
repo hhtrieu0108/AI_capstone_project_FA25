@@ -16,3 +16,9 @@ data/
 
 # Environment variables
 *.env
+
+# Key
+key/
+
+# Test
+test/
