@@ -25,8 +25,6 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-KEYRING_SERVICE = "gdrive_ingestor"
-KEYRING_USER = "ggdrive_ingestor"
 
 class GoogleDriveAuthenticator:
 
