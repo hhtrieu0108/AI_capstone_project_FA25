@@ -3,7 +3,6 @@ import json
 import pickle
 import logging
 from dotenv import load_dotenv
-from concurrent.futures import ThreadPoolExecutor
 
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -24,11 +23,9 @@ ch = logging.FileHandler('logs/gdrive_ingest.log', encoding='utf-8')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-
 class GoogleDriveAuthenticator:
 
-    def __init__(self, scope: build=None):
+    def __init__(self, scope=None):
         self.scope = scope or SCOPES
         self.service = None
 
@@ -38,8 +35,6 @@ class GoogleDriveAuthenticator:
         logger.info(f"Credentials saved to {path}.")
 
     def _load_creds(self, path="key/token.pickle"):
-        print(path)
-        print(os.getcwd())
         if not os.path.exists(path):
             return None
         with open(path, "rb") as f:
@@ -139,14 +134,15 @@ class GoogleDriveService:
                 break
 
 
-if __name__ == "__main__":
-    ggdrive_auth = GoogleDriveAuthenticator(scope=SCOPES)
-    ggdrive_auth.authenticate()
-    service = ggdrive_auth.get_ggdrive_service()
+# Test
+# if __name__ == "__main__":
+#     ggdrive_auth = GoogleDriveAuthenticator(scope=SCOPES)
+#     ggdrive_auth.authenticate()
+#     service = ggdrive_auth.get_ggdrive_service()
 
-    ggdriver_ser = GoogleDriveService(service=service)
+#     ggdriver_ser = GoogleDriveService(service=service)
 
-    list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
+#     list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
     
-    for folder_id in list_folder_id:
-        ggdriver_ser.download_folder(folder_id=folder_id, output_path='test/test_folder')
+#     for folder_id in list_folder_id:
+#         ggdriver_ser.download_folder(folder_id=folder_id, output_path='test/test_folder')

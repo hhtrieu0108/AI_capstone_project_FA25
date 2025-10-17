@@ -1,5 +1,7 @@
-keyring
 python-dotenv
+pillow-heif
+Pillow
+roboflow
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
