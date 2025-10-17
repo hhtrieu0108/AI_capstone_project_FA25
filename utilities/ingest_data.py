@@ -37,7 +37,7 @@ class GoogleDriveAuthenticator:
             pickle.dump(creds, f)
         logger.info(f"Credentials saved to {path}.")
 
-    def _load_creds(self, path=fr"key/token.pickle"):
+    def _load_creds(self, path="key/token.pickle"):
         print(path)
         print(os.getcwd())
         if not os.path.exists(path):
