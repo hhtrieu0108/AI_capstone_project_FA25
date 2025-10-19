@@ -62,9 +62,10 @@ class RoboflowUploader:
     
     def upload_folder(self, folder_path: str):
         folder_path = Path(folder_path)
+
         for file_path in folder_path.rglob("*.jpg"):
             try:
-                self.project.version(1).upload(file_path=str(file_path))
+                self.project.upload(image_path=str(file_path))
                 print(f"Uploaded {file_path}")
             except Exception as e:
                 print(f"Error uploading {file_path}: {e}")
@@ -74,11 +75,13 @@ if __name__ == "__main__":
     pillow_heif.register_heif_opener()
 
     list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
-    
-    RAW_DATA_PATH = 'test/test_folder'
-    PROCESSED_DATA_PATH = "test/processed_data"
+    output_path = 'data/raw'
+
+    RAW_DATA_PATH = 'data/raw'
+    PROCESSED_DATA_PATH = "data/processed_data"
     pipeline = DataPipelineProcesser()
     
+    pipeline.ingest_data(list_folder_id=list_folder_id, output_path=output_path)
     pipeline.processing_data(raw_path=RAW_DATA_PATH, processed_path=PROCESSED_DATA_PATH)
 
     api_key = os.environ.get("ROBOFLOW_API_KEY")

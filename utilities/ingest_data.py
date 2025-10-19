@@ -133,10 +133,9 @@ class GoogleDriveService:
             if page_token is None:
                 break
 
-
-# Test
 # if __name__ == "__main__":
-#     ggdrive_auth = GoogleDriveAuthenticator(scope=SCOPES)
+#     scope = ['https://www.googleapis.com/auth/drive.readonly']
+#     ggdrive_auth = GoogleDriveAuthenticator(scope=scope)
 #     ggdrive_auth.authenticate()
 #     service = ggdrive_auth.get_ggdrive_service()
 
