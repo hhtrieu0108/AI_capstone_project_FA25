@@ -3,8 +3,11 @@ import pillow_heif
 from PIL import Image
 from pathlib import Path
 from roboflow import Roboflow
+from unidecode import unidecode
 
 from ingest_data import GoogleDriveAuthenticator, GoogleDriveService
+
+from concurrent.futures import ThreadPoolExecutor
 
 class DataPipelineProcesser:
     
@@ -32,7 +35,7 @@ class DataPipelineProcesser:
             if not folder.is_dir():
                 continue
 
-            clean_folder_name = folder.name.replace(" ", "_")
+            clean_folder_name = unidecode(folder.name).replace(" ", "_")
             dest_folder = processed_path / clean_folder_name
             dest_folder.mkdir(parents=True, exist_ok=True)
 
@@ -60,15 +63,18 @@ class RoboflowUploader:
         self.rf = Roboflow(api_key=api_key)
         self.project = self.rf.workspace(workspace).project(project)
     
-    def upload_folder(self, folder_path: str):
-        folder_path = Path(folder_path)
+    def _upload_file(self, file_path):
+        try:
+            self.project.upload(image_path=str(file_path))
+            print(f"Uploaded {file_path}")
+        except Exception as e:
+            print(f"Error uploading {file_path}: {e}")
 
-        for file_path in folder_path.rglob("*.jpg"):
-            try:
-                self.project.upload(image_path=str(file_path))
-                print(f"Uploaded {file_path}")
-            except Exception as e:
-                print(f"Error uploading {file_path}: {e}")
+    def upload_folder(self, folder_path: str, max_workers=8):
+        folder_path = Path(folder_path)
+        files = list(folder_path.rglob("*.jpg"))
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            executor.map(self._upload_file, files)
 
 if __name__ == "__main__":
 
