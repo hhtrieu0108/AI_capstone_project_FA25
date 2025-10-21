@@ -76,8 +76,7 @@ class RoboflowUploader:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             executor.map(self._upload_file, files)
 
-if __name__ == "__main__":
-
+def main() -> None:
     pillow_heif.register_heif_opener()
 
     # list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
@@ -96,3 +95,6 @@ if __name__ == "__main__":
 
     uploader = RoboflowUploader(api_key, workspace, project)
     uploader.upload_folder(folder_path=PROCESSED_DATA_PATH)
+
+if __name__ == "__main__":
+    main()
