@@ -80,15 +80,15 @@ if __name__ == "__main__":
 
     pillow_heif.register_heif_opener()
 
-    list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
-    output_path = 'data/raw'
+    # list_folder_id = ['12liJ0oGdAStAmX2NXAvlCvJ-_6h-enwo']
+    # output_path = 'data/raw'
 
-    RAW_DATA_PATH = 'data/raw'
+    # RAW_DATA_PATH = 'data/raw'
     PROCESSED_DATA_PATH = "data/processed_data"
-    pipeline = DataPipelineProcesser()
+    # pipeline = DataPipelineProcesser()
     
-    pipeline.ingest_data(list_folder_id=list_folder_id, output_path=output_path)
-    pipeline.processing_data(raw_path=RAW_DATA_PATH, processed_path=PROCESSED_DATA_PATH)
+    # pipeline.ingest_data(list_folder_id=list_folder_id, output_path=output_path)
+    # pipeline.processing_data(raw_path=RAW_DATA_PATH, processed_path=PROCESSED_DATA_PATH)
 
     api_key = os.environ.get("ROBOFLOW_API_KEY")
     workspace = "plant-xcvlc"
