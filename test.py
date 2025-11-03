@@ -1,5 +1,6 @@
-from ultralytics import YOLO
 import cv2
+
+from ultralytics import YOLO
 
 # ============================
 # 1️⃣ Load model
@@ -13,10 +14,10 @@ model = YOLO(model_path)
 image_path = "DOMSOC2.jpg"  # thay bằng ảnh bạn muốn test
 results = model.predict(
     source=image_path,
-    conf=0.05,      # ngưỡng tin cậy
-    iou=0.45,      # ngưỡng NMS
-    save=True,     # lưu kết quả (mask overlay)
-    show=False     # hiển thị cửa sổ OpenCV nếu True
+    conf=0.05,  # ngưỡng tin cậy
+    iou=0.45,  # ngưỡng NMS
+    save=True,  # lưu kết quả (mask overlay)
+    show=False,  # hiển thị cửa sổ OpenCV nếu True
 )
 
 # ============================
@@ -32,7 +33,7 @@ for result in results:
         cls_id = int(result.boxes.cls[i])
         conf = float(result.boxes.conf[i])
         label = names[cls_id]
-        print(f"{i+1}. Lớp: {label} - Độ tin cậy: {conf:.2f} - Box: {box.tolist()}")
+        print(f"{i + 1}. Lớp: {label} - Độ tin cậy: {conf:.2f} - Box: {box.tolist()}")
 
 # ============================
 # 4️⃣ Hiển thị kết quả (OpenCV)
