@@ -1,0 +1,42 @@
+# YOLO11n-seg modified (no custom blocks, fully compliant)
+
+nc: 4
+
+scales:
+  n: [0.33, 0.40, 1024]   # tăng width từ 0.25 -> 0.40 để mạnh hơn but vẫn nhanh
+
+backbone:
+  - [-1, 1, Conv, [64, 3, 2]]
+  - [-1, 1, Conv, [128, 3, 2]]
+  - [-1, 4, C2f, [128, True]]       # tăng depth 3 -> 4
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [-1, 6, C2f, [256, True]]
+  - [-1, 1, Conv, [512, 3, 2]]
+  - [-1, 6, C2f, [512, True]]
+  - [-1, 1, Conv, [1024, 3, 2]]
+  - [-1, 4, C2f, [1024, True]]      # tăng depth 3 -> 4
+  - [-1, 1, SPPF, [1024, 5]]
+
+head:
+  # P4
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 6], 1, Concat, [1]]
+  - [-1, 4, C2f, [512]]              # tăng depth 3 -> 4
+
+  # P3
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 4], 1, Concat, [1]]
+  - [-1, 4, C2f, [256]]              # tăng depth 3 -> 4
+
+  # P4 fused
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 12], 1, Concat, [1]]
+  - [-1, 4, C2f, [512]]              # tăng depth
+
+  # P5 fused
+  - [-1, 1, Conv, [512, 3, 2]]
+  - [[-1, 9], 1, Concat, [1]]
+  - [-1, 4, C2f, [1024]]             # tăng depth
+
+  # Segment head – CHUẨN 3 levels
+  - [[15, 18, 21], 1, Segment, [nc, 64, 256]]   # tăng proto 64

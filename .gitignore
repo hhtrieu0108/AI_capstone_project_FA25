@@ -176,3 +176,5 @@ pnnx*
 
 # calibration image
 calibration_*.npy
+
+runs_rice/

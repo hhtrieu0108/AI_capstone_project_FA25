@@ -4,19 +4,21 @@ import cv2
 # ============================
 # 1️⃣ Load model
 # ============================
-model_path = r""  # hoặc đường dẫn bạn lưu model
+model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\detector_from_custom_yaml\weights\best.pt"  # hoặc đường dẫn bạn lưu model
 model = YOLO(model_path)
 
 # ============================
 # 2️⃣ Dự đoán trên 1 ảnh
 # ============================
-image_path = "DOMSOC2.jpg"  # thay bằng ảnh bạn muốn test
+image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\Dau-hieu-benh-dom-nau-tren-la.png"  # thay bằng ảnh bạn muốn test
 results = model.predict(
+    task="segment",
     source=image_path,
-    conf=0.05,      # ngưỡng tin cậy
+    conf=0.5,      # ngưỡng tin cậy
     iou=0.45,      # ngưỡng NMS
     save=True,     # lưu kết quả (mask overlay)
-    show=False     # hiển thị cửa sổ OpenCV nếu True
+    show=False,     # hiển thị cửa sổ OpenCV nếu True
+    retina_masks=True
 )
 
 # ============================
