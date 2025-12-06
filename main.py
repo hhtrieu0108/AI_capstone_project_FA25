@@ -10,7 +10,7 @@ from ultralytics import YOLO
 
 
 # ---------- Load model 1 lần khi khởi động ----------
-MODEL_PATH = r"ultralytics\runs_rice\best_model\weights\best.pt"
+MODEL_PATH = r"ultralytics\best_model\weights\best.pt"
 #MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11n-trans_all_sett\weights\best.pt"
 #MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
 model = YOLO(MODEL_PATH)
@@ -167,3 +167,4 @@ async def predict(files: List[UploadFile] = File(...)) -> MultiPredictionRespons
 @app.get("/health")
 async def health():
     return {"status": "ok", "model": MODEL_PATH}
+
