@@ -1,4 +1,4 @@
-utralytics
+ultralytics
 fastapi
 uvicorn
 python-multipart
