@@ -11,7 +11,7 @@ from ultralytics import YOLO
 
 # ---------- Load model 1 lần khi khởi động ----------
 # best-seg.pt có thể là yolov8-seg hoặc yolo11-seg, API như nhau (task=segment):contentReference[oaicite:16]{index=16}
-MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\modify_p2_stage2\weights\best.pt"
+MODEL_PATH = r"ultralytics\runs_rice\best_model\weights\best.pt"
 model = YOLO(MODEL_PATH)
 
 app = FastAPI(
