@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>YOLO Segmentation Demo</title>
+  <title>YOLO Segmentation Demo - Multi Image</title>
   <style>
     body {
       font-family: sans-serif;
@@ -10,27 +10,63 @@
       background: #121212;
       color: #f5f5f5;
     }
+    .controls {
+      margin-bottom: 16px;
+    }
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    input[type="file"] {
+      color: #f5f5f5;
+    }
     .container {
       display: flex;
       gap: 20px;
       align-items: flex-start;
     }
-    #preview-container {
+    #results-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      max-width: 1200px;
+    }
+    .result-item {
+      border: 1px solid #444;
+      background: #1e1e1e;
+      padding: 8px;
+      max-width: 520px;
+    }
+    .preview-container {
       position: relative;
       display: inline-block;
       border: 1px solid #444;
       padding: 4px;
       background: #1e1e1e;
+      max-width: 500px;
+      overflow: auto;
     }
-    #preview {
+    .preview-img {
       display: block;
-      max-width: 800px;
+      max-width: 500px;
     }
-    #overlay {
+    .overlay-canvas {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 4px;
+      left: 4px;
       pointer-events: none;
+    }
+    .item-json {
+      width: 500px;
+      max-height: 260px;
+      background: #141414;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      padding: 8px;
+      overflow: auto;
+      font-size: 11px;
+      white-space: pre;
+      margin-top: 8px;
     }
     #result-json {
       width: 500px;
@@ -43,90 +79,110 @@
       font-size: 12px;
       white-space: pre;
     }
-    .controls {
-      margin-bottom: 10px;
+    #file-list {
+      font-size: 12px;
+      margin-top: 4px;
+      color: #cccccc;
     }
-    button {
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-    input[type="file"] {
-      color: #f5f5f5;
+    #file-list button {
+      margin-left: 8px;
+      padding: 2px 6px;
+      font-size: 11px;
     }
   </style>
 </head>
 <body>
-  <h1>YOLO Segmentation FastAPI Demo</h1>
+  <h1>YOLO Segmentation FastAPI Demo (Multi Image)</h1>
 
   <div class="controls">
-    <label>Chọn ảnh:
-      <input type="file" id="file-input" accept="image/*" />
+    <label>Chọn ảnh (có thể chọn nhiều, chọn nhiều lần):
+      <input type="file" id="file-input" accept="image/*" multiple />
     </label>
     <button id="btn-predict">Gửi lên API</button>
     <span id="status"></span>
+    <div id="file-count"></div>
+    <div id="file-list"></div>
   </div>
 
   <div class="container">
-    <div id="preview-container">
-      <img id="preview" alt="preview" />
-      <canvas id="overlay"></canvas>
-    </div>
-
+    <div id="results-container"></div>
     <pre id="result-json">{}</pre>
   </div>
 
   <script>
-    const API_URL = "http://localhost:8000/predict"; // đúng với FastAPI bạn đang chạy
+    const API_URL = "http://localhost:8000/predict";
 
     const fileInput = document.getElementById("file-input");
     const btnPredict = document.getElementById("btn-predict");
     const statusSpan = document.getElementById("status");
-    const previewImg = document.getElementById("preview");
-    const overlayCanvas = document.getElementById("overlay");
+    const fileCountEl = document.getElementById("file-count");
+    const fileListEl = document.getElementById("file-list");
+    const resultsContainer = document.getElementById("results-container");
     const resultJsonEl = document.getElementById("result-json");
 
-    let selectedFile = null;
+    // DANH SÁCH FILE ĐÃ CHỌN (CỘNG DỒN)
+    let selectedFiles = [];
 
+    function updateFileSummary() {
+      fileListEl.innerHTML = "";
+
+      if (!selectedFiles.length) {
+        fileCountEl.textContent = "";
+        return;
+      }
+
+      fileCountEl.textContent = `Đã chọn ${selectedFiles.length} ảnh (có thể chọn thêm trước khi gửi)`;
+
+      selectedFiles.forEach((f, idx) => {
+        const row = document.createElement("div");
+        row.textContent = `${idx + 1}. ${f.name}`;
+
+        const btnDel = document.createElement("button");
+        btnDel.textContent = "Xóa";
+        btnDel.onclick = () => {
+          // XÓA 1 ẢNH KHỎI DANH SÁCH
+          selectedFiles.splice(idx, 1);
+          updateFileSummary();
+        };
+
+        row.appendChild(btnDel);
+        fileListEl.appendChild(row);
+      });
+    }
+
+    // CỘNG DỒN FILE MỖI LẦN CHỌN
     fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      selectedFile = file;
+      const newFiles = Array.from(e.target.files || []);
 
-      const reader = new FileReader();
-      reader.onload = function (ev) {
-        previewImg.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
+      newFiles.forEach((nf) => {
+        const exists = selectedFiles.some(
+          (sf) => sf.name === nf.name && sf.lastModified === nf.lastModified
+        );
+        if (!exists) {
+          selectedFiles.push(nf);
+        }
+      });
+
+      // reset input để lần sau chọn lại vẫn trigger change
+      fileInput.value = "";
+
+      updateFileSummary();
     });
 
-    // Khi ảnh load xong, resize canvas trùng kích thước ảnh
-    previewImg.onload = function () {
-      const w = previewImg.naturalWidth;
-      const h = previewImg.naturalHeight;
-
-      // đặt width/height hiển thị đúng kích thước gốc để toạ độ khớp
-      previewImg.width = w;
-      previewImg.height = h;
-
-      overlayCanvas.width = w;
-      overlayCanvas.height = h;
-
-      // clear canvas
-      const ctx = overlayCanvas.getContext("2d");
-      ctx.clearRect(0, 0, w, h);
-    };
-
     btnPredict.addEventListener("click", async () => {
-      if (!selectedFile) {
-        alert("Chọn ảnh trước đã.");
+      if (!selectedFiles.length) {
+        alert("Chọn ít nhất 1 ảnh trước đã.");
         return;
       }
 
       statusSpan.textContent = "Đang gửi...";
       resultJsonEl.textContent = "{}";
+      resultsContainer.innerHTML = "";
 
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      selectedFiles.forEach((file) => {
+        formData.append("files", file); // trùng với backend: files: List[UploadFile]
+      });
 
       try {
         const res = await fetch(API_URL, {
@@ -145,31 +201,101 @@
         statusSpan.textContent = "OK";
         resultJsonEl.textContent = JSON.stringify(data, null, 2);
 
-        drawDetections(data);
+        renderResults(data);
       } catch (err) {
         console.error(err);
         statusSpan.textContent = "Lỗi gọi API";
       }
     });
 
-    function drawDetections(data) {
-      const ctx = overlayCanvas.getContext("2d");
-      const w = overlayCanvas.width;
-      const h = overlayCanvas.height;
+    function renderResults(data) {
+      if (!data || !Array.isArray(data.results)) return;
+
+      resultsContainer.innerHTML = "";
+
+      data.results.forEach((imgResult, idx) => {
+        const item = document.createElement("div");
+        item.className = "result-item";
+
+        const header = document.createElement("div");
+        header.textContent = `Ảnh ${idx + 1}: ${imgResult.filename || "(không tên)"}`;
+        header.style.marginBottom = "4px";
+        header.style.fontWeight = "bold";
+        item.appendChild(header);
+
+        const previewContainer = document.createElement("div");
+        previewContainer.className = "preview-container";
+
+        const imgEl = document.createElement("img");
+        imgEl.className = "preview-img";
+
+        const canvasEl = document.createElement("canvas");
+        canvasEl.className = "overlay-canvas";
+
+        previewContainer.appendChild(imgEl);
+        previewContainer.appendChild(canvasEl);
+        item.appendChild(previewContainer);
+
+        const jsonEl = document.createElement("pre");
+        jsonEl.className = "item-json";
+        jsonEl.textContent = JSON.stringify(imgResult, null, 2);
+        item.appendChild(jsonEl);
+
+        resultsContainer.appendChild(item);
+
+        // dùng thứ tự selectedFiles để load preview tương ứng
+        const file = selectedFiles[idx];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          imgEl.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        imgEl.onload = function () {
+          // kích thước HIỂN THỊ thực tế (đã bị max-width: 500px thu nhỏ)
+          const displayW = imgEl.clientWidth;
+          const displayH = imgEl.clientHeight;
+
+          // canvas phủ đúng lên ảnh hiển thị
+          canvasEl.width = displayW;
+          canvasEl.height = displayH;
+          canvasEl.style.width = displayW + "px";
+          canvasEl.style.height = displayH + "px";
+
+          // scale từ kích thước ẢNH GỐC (image_width/height) -> kích thước Hiển thị
+          const scaleX = displayW / imgResult.image_width;
+          const scaleY = displayH / imgResult.image_height;
+
+          drawDetectionsOnCanvas(canvasEl, imgResult, scaleX, scaleY);
+        };
+      });
+    }
+
+    function drawDetectionsOnCanvas(canvas, imgPrediction, scaleX, scaleY) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
-      if (!data || !data.detections) return;
+      if (!imgPrediction || !imgPrediction.detections) return;
 
-      // vẽ bbox & polygon
-      data.detections.forEach((det) => {
+      imgPrediction.detections.forEach((det) => {
         const { box, class_name, confidence, mask } = det;
+
+        // scale toạ độ bbox sang hệ toạ độ HIỂN THỊ
+        const x1 = box.x1 * scaleX;
+        const y1 = box.y1 * scaleY;
+        const x2 = box.x2 * scaleX;
+        const y2 = box.y2 * scaleY;
+        const bw = x2 - x1;
+        const bh = y2 - y1;
 
         // Vẽ bounding box
         ctx.strokeStyle = "lime";
         ctx.lineWidth = 2;
-        const bw = box.x2 - box.x1;
-        const bh = box.y2 - box.y1;
-        ctx.strokeRect(box.x1, box.y1, bw, bh);
+        ctx.strokeRect(x1, y1, bw, bh);
 
         // Vẽ label
         const label = `${class_name} ${(confidence * 100).toFixed(1)}%`;
@@ -177,20 +303,22 @@
         ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
         const tw = ctx.measureText(label).width;
         const th = 16;
-        ctx.fillRect(box.x1, box.y1 - th, tw + 4, th);
+        ctx.fillRect(x1, y1 - th, tw + 4, th);
         ctx.fillStyle = "white";
-        ctx.fillText(label, box.x1 + 2, box.y1 - 3);
+        ctx.fillText(label, x1 + 2, y1 - 3);
 
-        // Vẽ mask polygon nếu có
+        // Vẽ mask polygon nếu có (scale từng điểm)
         if (mask && Array.isArray(mask)) {
           ctx.beginPath();
-          // mask là list segment, each segment.points = [[x,y], ...]
           mask.forEach((seg) => {
             const pts = seg.points;
             if (!pts || pts.length === 0) return;
-            ctx.moveTo(pts[0][0], pts[0][1]);
+            const [x0, y0] = [pts[0][0] * scaleX, pts[0][1] * scaleY];
+            ctx.moveTo(x0, y0);
             for (let i = 1; i < pts.length; i++) {
-              ctx.lineTo(pts[i][0], pts[i][1]);
+              const x = pts[i][0] * scaleX;
+              const y = pts[i][1] * scaleY;
+              ctx.lineTo(x, y);
             }
             ctx.closePath();
           });
