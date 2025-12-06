@@ -12,15 +12,16 @@ def main():
     
 
     model.train(
-        data="data2/data.yaml",   # file YAML roboflow (train/val/test/nc/names)      
-        epochs=300, # weight pretrained COCO detect
+        data="dataset2/data.yaml",   # file YAML roboflow (train/val/test/nc/names)      
+        epochs=200, # weight pretrained COCO detect
         imgsz=640,
         batch=8,
         device="cuda", 
-        freeze=10,          
+        # freeze=10,          
         workers=4,
         project="runs_rice",
-        name="detector_from_custom_yaml"
+        name="yolov11-captsone-transfer-learning",
+        augment=True,
     )
 
 if __name__ == "__main__":

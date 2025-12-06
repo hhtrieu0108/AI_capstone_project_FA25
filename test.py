@@ -1,26 +1,29 @@
 from ultralytics import YOLO
 import cv2
-
+import torch
 # ============================
 # 1️⃣ Load model
 # ============================
-model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\detector_from_custom_yaml\weights\best.pt"  # hoặc đường dẫn bạn lưu model
+model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
+#model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11n-trans_all_sett\weights\best.pt"
+#model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset_450_epochs\weights\best.pt"  # hoặc đường dẫn bạn lưu model
 model = YOLO(model_path)
 
 # ============================
 # 2️⃣ Dự đoán trên 1 ảnh
 # ============================
-image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\Dau-hieu-benh-dom-nau-tren-la.png"  # thay bằng ảnh bạn muốn test
+image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\Dom_nau_IMG_2131_jpg.rf.824675a87fa78896b8756d2bc6a87eee.jpg"  # thay bằng ảnh bạn muốn test
 results = model.predict(
     task="segment",
     source=image_path,
-    conf=0.5,      # ngưỡng tin cậy
-    iou=0.45,      # ngưỡng NMS
-    save=True,     # lưu kết quả (mask overlay)
+    conf=0.4,      # ngưỡng tin cậy
+    iou=0.6,      # ngưỡng NMSp
+    save=False,     # lưu kết quả (mask overlay)
     show=False,     # hiển thị cửa sổ OpenCV nếu True
     retina_masks=True
 )
 
+torch.cuda.empty_cache()  # giải phóng bộ nhớ GPU nếu cần
 # ============================
 # 3️⃣ Xem thông tin dự đoán
 # ============================
