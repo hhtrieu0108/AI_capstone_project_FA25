@@ -1,5 +1,6 @@
-from ultralytics import YOLO
 import cv2
+
+from ultralytics import YOLO
 
 # ============================
 # 1️⃣ Load model
@@ -14,11 +15,11 @@ image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\Dau-hieu-benh-dom-nau-tre
 results = model.predict(
     task="segment",
     source=image_path,
-    conf=0.5,      # ngưỡng tin cậy
-    iou=0.45,      # ngưỡng NMS
-    save=True,     # lưu kết quả (mask overlay)
-    show=False,     # hiển thị cửa sổ OpenCV nếu True
-    retina_masks=True
+    conf=0.5,  # ngưỡng tin cậy
+    iou=0.45,  # ngưỡng NMS
+    save=True,  # lưu kết quả (mask overlay)
+    show=False,  # hiển thị cửa sổ OpenCV nếu True
+    retina_masks=True,
 )
 
 # ============================
@@ -34,7 +35,7 @@ for result in results:
         cls_id = int(result.boxes.cls[i])
         conf = float(result.boxes.conf[i])
         label = names[cls_id]
-        print(f"{i+1}. Lớp: {label} - Độ tin cậy: {conf:.2f} - Box: {box.tolist()}")
+        print(f"{i + 1}. Lớp: {label} - Độ tin cậy: {conf:.2f} - Box: {box.tolist()}")
 
 # ============================
 # 4️⃣ Hiển thị kết quả (OpenCV)
