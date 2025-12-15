@@ -2,17 +2,21 @@ from ultralytics import YOLO
 import cv2
 import torch
 # ============================
-# 1️⃣ Load model
+# 1️ Load model
 # ============================
-model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
+model_path = r"runs_rice/yolo11_seg_stage2_full_finetune(2)/weights/best.pt"
+#model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\fine-tune_stage2_unfreeze\weights\best.pt"
+#model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
 #model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11n-trans_all_sett\weights\best.pt"
 #model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset_450_epochs\weights\best.pt"  # hoặc đường dẫn bạn lưu model
+#model_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11_finetune_stage2\weights\best.pt"
 model = YOLO(model_path)
 
 # ============================
-# 2️⃣ Dự đoán trên 1 ảnh
+# 2️ Dự đoán trên 1 ảnh
 # ============================
-image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\Dom_nau_IMG_2131_jpg.rf.824675a87fa78896b8756d2bc6a87eee.jpg"  # thay bằng ảnh bạn muốn test
+image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\Dau-hieu-benh-dom-nau-tren-la.png"
+#image_path = r"C:\Users\CoreUltra7\Desktop\ultralytics\z7322666108425_8511e38334cd17c44899aa03ce2f4ae4.jpg"  # thay bằng ảnh bạn muốn test
 results = model.predict(
     task="segment",
     source=image_path,
@@ -25,7 +29,7 @@ results = model.predict(
 
 torch.cuda.empty_cache()  # giải phóng bộ nhớ GPU nếu cần
 # ============================
-# 3️⃣ Xem thông tin dự đoán
+# 3️ Xem thông tin dự đoán
 # ============================
 for result in results:
     boxes = result.boxes.xyxy  # toạ độ bounding boxes (x1, y1, x2, y2)
@@ -40,7 +44,7 @@ for result in results:
         print(f"{i+1}. Lớp: {label} - Độ tin cậy: {conf:.2f} - Box: {box.tolist()}")
 
 # ============================
-# 4️⃣ Hiển thị kết quả (OpenCV)
+# 4 Hiển thị kết quả (OpenCV)
 # ============================
 result_img = results[0].plot()  # ảnh có overlay mask + bbox
 cv2.imshow("Segmentation Result", result_img)

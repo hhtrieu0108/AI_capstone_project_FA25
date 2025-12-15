@@ -10,8 +10,8 @@ from ultralytics import YOLO
 
 
 # ---------- Load model 1 lần khi khởi động ----------
-MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset_450_epochs\weights\best.pt"
-#MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11n-trans_all_sett\weights\best.pt"
+#MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset_450_epochs\weights\best.pt"
+MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11_seg_stage2_full_finetune(2)\weights\best.pt"
 #MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
 model = YOLO(MODEL_PATH)
 
