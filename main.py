@@ -1,4 +1,4 @@
-from typing import List, Optional
+from __future__ import annotations
 
 import cv2
 import numpy as np
@@ -8,11 +8,10 @@ from pydantic import BaseModel
 
 from ultralytics import YOLO
 
-
 # ---------- Load model 1 lần khi khởi động ----------
 MODEL_PATH = "ultralytics/best_model/weights/best.pt"
-#MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11n-trans_all_sett\weights\best.pt"
-#MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
+# MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\yolo11n-trans_all_sett\weights\best.pt"
+# MODEL_PATH = r"C:\Users\CoreUltra7\Desktop\ultralytics\runs_rice\Yolo11_seg_dataset2\weights\best.pt"
 model = YOLO(MODEL_PATH)
 
 app = FastAPI(
@@ -41,7 +40,7 @@ class Box(BaseModel):
 
 class MaskPolygon(BaseModel):
     # Một segment polygon: list điểm [x, y]
-    points: List[List[float]]
+    points: list[list[float]]
 
 
 class Detection(BaseModel):
@@ -50,18 +49,18 @@ class Detection(BaseModel):
     class_name: str
     confidence: float
     box: Box
-    mask: Optional[List[MaskPolygon]] = None
+    mask: list[MaskPolygon] | None = None
 
 
 class ImagePrediction(BaseModel):
     filename: str
     image_width: int
     image_height: int
-    detections: List[Detection]
+    detections: list[Detection]
 
 
 class MultiPredictionResponse(BaseModel):
-    results: List[ImagePrediction]
+    results: list[ImagePrediction]
 
 
 # ---------- Utils ----------
@@ -76,15 +75,12 @@ def read_image_from_upload(file: UploadFile) -> np.ndarray:
 
 # ---------- Inference endpoint: nhiều ảnh ----------
 @app.post("/predict", response_model=MultiPredictionResponse)
-async def predict(files: List[UploadFile] = File(...)) -> MultiPredictionResponse:
-    """
-    Nhận N ảnh, resize vào model 640x640, trả về bbox + class + mask polygon theo KÍCH THƯỚC ẢNH GỐC.
-    """
-
-    all_results: List[ImagePrediction] = []
+async def predict(files: list[UploadFile] = File(...)) -> MultiPredictionResponse:
+    """Nhận N ảnh, resize vào model 640x640, trả về bbox + class + mask polygon theo KÍCH THƯỚC ẢNH GỐC."""
+    all_results: list[ImagePrediction] = []
 
     for file in files:
-    # 1) Đọc ảnh gốc
+        # 1) Đọc ảnh gốc
         img = read_image_from_upload(file)
         h0, w0 = img.shape[:2]  # kích thước gốc để trả về cho frontend
 
@@ -103,13 +99,13 @@ async def predict(files: List[UploadFile] = File(...)) -> MultiPredictionRespons
         masks = result.masks
         names = result.names  # dict id -> class_name
 
-        detections: List[Detection] = []
+        detections: list[Detection] = []
 
         if boxes is not None:
             # boxes.xyxy đã ở hệ toạ độ ảnh gốc (h0, w0)
-            xyxy = boxes.xyxy.cpu().numpy()           # (N, 4)
-            conf = boxes.conf.cpu().numpy()           # (N,)
-            cls = boxes.cls.cpu().numpy().astype(int) # (N,)
+            xyxy = boxes.xyxy.cpu().numpy()  # (N, 4)
+            conf = boxes.conf.cpu().numpy()  # (N,)
+            cls = boxes.cls.cpu().numpy().astype(int)  # (N,)
 
             mask_polygons = None
             if masks is not None:
@@ -124,10 +120,10 @@ async def predict(files: List[UploadFile] = File(...)) -> MultiPredictionRespons
                 c_name = names.get(c_id, str(c_id))
                 c_conf = float(conf[i])
 
-                polygons: Optional[List[MaskPolygon]] = None
+                polygons: list[MaskPolygon] | None = None
                 if mask_polygons is not None:
                     seg_i = mask_polygons[i]
-                    polys_for_det: List[MaskPolygon] = []
+                    polys_for_det: list[MaskPolygon] = []
 
                     # Trường hợp có nhiều segment
                     if isinstance(seg_i, list):
@@ -153,12 +149,11 @@ async def predict(files: List[UploadFile] = File(...)) -> MultiPredictionRespons
 
         img_pred = ImagePrediction(
             filename=file.filename,
-            image_width=int(w0),   # KÍCH THƯỚC ẢNH GỐC
+            image_width=int(w0),  # KÍCH THƯỚC ẢNH GỐC
             image_height=int(h0),
             detections=detections,
         )
         all_results.append(img_pred)
-
 
     return MultiPredictionResponse(results=all_results)
 
@@ -167,5 +162,3 @@ async def predict(files: List[UploadFile] = File(...)) -> MultiPredictionRespons
 @app.get("/health")
 async def health():
     return {"status": "ok", "model": MODEL_PATH}
-
-

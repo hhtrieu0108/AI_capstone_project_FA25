@@ -1,6 +1,7 @@
 # modify.py
 from ultralytics import YOLO
 
+
 def train_modify():
     # 1) Khởi tạo từ YAML bạn đã sửa (yolov8n-seg-p2.yaml có nc=4)
     # model = YOLO("yolov8n-seg-p2.yaml")
@@ -30,10 +31,16 @@ def train_modify():
         batch=8,
         device="cuda",
         freeze=0,
-        lr0=2.5e-3, lrf=2e-4, cos_lr=True,
-        mosaic=0.25, copy_paste=0.2, mixup=0.0,
-        project="runs_rice", name="modify_p2_stage2"
+        lr0=2.5e-3,
+        lrf=2e-4,
+        cos_lr=True,
+        mosaic=0.25,
+        copy_paste=0.2,
+        mixup=0.0,
+        project="runs_rice",
+        name="modify_p2_stage2",
     )
+
 
 if __name__ == "__main__":
     train_modify()
